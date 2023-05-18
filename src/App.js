@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import React from 'react';
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, cssC}) {
   return (
-    <button className="square" onClick={onSquareClick}>{value}
-    </button>
+    <button className={cssC} onClick={onSquareClick}>{value}</button>
   );
 }
 
 function Board({ xIsNext, squares, onPlay}) {
   function handleClick(i) {
-    if (calculateWinner(squares) || squares[i] ) {
+
+    if (calculateWinner(squares)[0].length > 0 || squares[i] ) {
       return;
     }
     const nextSquares = squares.slice();
@@ -32,8 +32,8 @@ function Board({ xIsNext, squares, onPlay}) {
   }
 
   let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
+  if (winner[0].length > 0 ) {
+    status = 'Winner: ' + winner[0];
   } else if (draw) {
     status = 'Draw!';
   } else {
@@ -43,7 +43,7 @@ function Board({ xIsNext, squares, onPlay}) {
   // create square button
   function createSquare(i) {
     return (
-      <Square key={i} value={squares[i]} onSquareClick={() => handleClick(i)} />
+      <Square key={i} value={squares[i]} onSquareClick={() => handleClick(i)} cssC={winner[1].includes(i) ? "square-highlight" : "square"  } />
     );
   }
 
@@ -71,8 +71,7 @@ function Board({ xIsNext, squares, onPlay}) {
   }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]); 
-  console.log(history);
+  const [history, setHistory] = useState([Array(9).fill(null)]);  
   const [currentMove, setCurrentMove] = useState(0);
   const [isAscending, setIsAscending] = useState(true); // default as ascending (True)
   const xIsNext = currentMove % 2 === 0;
@@ -142,8 +141,8 @@ function calculateWinner(squares) {
   for ( let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return [squares[a], lines[i]]
     }
-  }
-  return null;
+    }
+  return ['', []];
   }
