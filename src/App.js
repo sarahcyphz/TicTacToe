@@ -23,25 +23,36 @@ function Board({ xIsNext, squares, onPlay}) {
   }
 
   const winner = calculateWinner(squares);
+
+  let draw = true;                               
+  for (let j = 0; j < squares.length; j++) {  // determine if all sqrs are full
+    if (squares[j] === null) {
+      draw = false;
+    }
+  }
+
   let status;
   if (winner) {
     status = 'Winner: ' + winner;
+  } else if (draw) {
+    status = 'Draw!';
   } else {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
-  }
-
+  } 
+ 
+  // create square button
   function createSquare(i) {
     return (
       <Square key={i} value={squares[i]} onSquareClick={() => handleClick(i)} />
     );
   }
 
-  function test() { 
-    let boardRows = [];
-    for (let i=0; i<3; ++i) {
-      let rows = [];
+  function createBoard() { 
+    const boardRows = [];
+    for (let i=0; i<3; ++i) {  // create rows
+      const rows = [];
       for (let j=0; j<3; ++j) {
-        rows.push(createSquare((j * 3)+ i));
+        rows.push(createSquare((j * 3)+ i));  //create squares
       }
       boardRows.push((<div key={i} className="board-row">{rows}</div>));
     }
@@ -54,15 +65,16 @@ function Board({ xIsNext, squares, onPlay}) {
     return (
       <div>
         <div className="status">{status}</div>
-        {test()}
+        {createBoard()}
       </div>
     );
   }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [history, setHistory] = useState([Array(9).fill(null)]); 
+  console.log(history);
   const [currentMove, setCurrentMove] = useState(0);
-  const [toggleButton, setToggleButton] = useState(0); //
+  const [isAscending, setIsAscending] = useState(true); // default as ascending (True)
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -72,11 +84,12 @@ export default function Game() {
     setCurrentMove(nextHistory.length - 1);
   }
 
+  console.log(history);
   function jumpTo(nextMove) {
     setCurrentMove(nextMove);
   }
 
-  const moves = history.map((squares, move) => {
+  let moves = history.map((squares, move) => {  // const to let so can change map
     let description;
     if (move > 0) {
       description = 'Go to move #' + move;
@@ -91,14 +104,22 @@ export default function Game() {
     ); 
   });
 
+  function toggleHistory() {
+    setIsAscending(!isAscending); // change boolean 
+  }
+
+  if(!isAscending) {
+    moves.reverse();    // if false, reverse
+  }
+
   return (
     < div className="game">
       <div className="game-board">
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <button onClick={setToggleButton}>
-          Sort
+        <button onClick={() => toggleHistory()}>
+          {isAscending ? 'Sort by descending' : 'Sort by ascending' }  
         </button>
         <ol>{moves}</ol>
         <ol>{"You are at move " + history.length}</ol>
