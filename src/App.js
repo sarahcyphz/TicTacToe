@@ -19,7 +19,7 @@ function Board({ xIsNext, squares, onPlay}) {
     } else {
       nextSquares[i] = 'O';
     }
-    onPlay(nextSquares);
+    onPlay(nextSquares, i);
   }
 
   const winner = calculateWinner(squares);
@@ -92,30 +92,18 @@ function Board({ xIsNext, squares, onPlay}) {
     }
   
     function matchPosition (position) {
-      let columnRowValue = ""
-  
-      if (position === 0) {
-        columnRowValue = "(1, 1)"
-      } else if (position === 1){
-        columnRowValue = "(1, 2)"
-      } else if (position === 2){
-        columnRowValue = "(1, 3)"
-      }else if (position === 3){
-        columnRowValue = "(2, 1)"
-      }else if (position === 4){
-        columnRowValue = "(2, 2)"
-      }else if (position === 5){
-        columnRowValue = "(2, 3)"
-      }else if (position === 6){
-        columnRowValue = "(3, 1)"
-      }else if (position === 7){
-        columnRowValue = "(3, 2)"
-      }else if (position === 8){
-        columnRowValue = "(3, 3)"
-      }else {
-        columnRowValue = "( , )"
-      }
-      return columnRowValue;
+      let col = [
+        "(1,1)",
+        "(1,2)",
+        "(1,3)",
+        "(2,1)",
+        "(2,2)",
+        "(2,3)",
+        "(3,1)",
+        "(3,2)",
+        "(3,3)",
+      ]
+      return col[position];
     }
   
     function jumpTo(nextMove) {
