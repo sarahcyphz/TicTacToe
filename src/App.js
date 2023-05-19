@@ -41,13 +41,14 @@ function Board({ xIsNext, squares, onPlay}) {
   } 
  
   // create square button
-  function createSquare(i) {
+  function createSquare(position) {
+    console.log(position);
     return (
       <Square 
-      key={i} 
-      value={squares[i]} 
-      onSquareClick={() => handleClick(i)} 
-      cssW={winner[1].includes(i) ? "square-highlight" : "square"} />  // determine if winning square
+      key={position} 
+      value={squares[position]} 
+      onSquareClick={() => handleClick(position)} 
+      cssW={winner[1].includes(position) ? "square-highlight" : "square"} />  // determine if winning square
     );
   }
 
@@ -73,65 +74,93 @@ function Board({ xIsNext, squares, onPlay}) {
       </div>
     );
   }
-
-export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);  
-  const [location, setLocation] = useState([Array(9).fill(null)]);  // duplicate history array
-  const [currentMove, setCurrentMove] = useState(0);
-  const [isAscending, setIsAscending] = useState(true); // default as ascending (True)
-  const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
-
-  function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
-    const nextLocation = [...history.slice(0, currentMove + 1), nextSquares]; 
-    setHistory(nextHistory);
-    setLocation(nextLocation);   
-    setCurrentMove(nextHistory.length - 1);  // current move
-  }
-
-  function jumpTo(nextMove) {
-    setCurrentMove(nextMove);
-  }
-
-  let moves = history.map((squares, move) => {  // const to let so can change map
-    let description;
-    if (move > 0) {
-      description = 'Go to move #' + move;
-    } else {
-      description = 'Go to game start';
+  export default function Game() {
+    const [history, setHistory] = useState([Array(9).fill(null)]);  
+    const [findLocation, setFindLocation] = useState([Array(9).fill(null)]);  // duplicate history array
+    const [currentMove, setCurrentMove] = useState(0);
+    const [isAscending, setIsAscending] = useState(true); // default as ascending 
+    const xIsNext = currentMove % 2 === 0;
+    const currentSquares = history[currentMove];
+  
+    function handlePlay(nextSquares, position) {
+      const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+      const nextLocation = [...findLocation.slice(0, currentMove + 1), matchPosition(position)]; 
+      setHistory(nextHistory);
+      setFindLocation(nextLocation);   
+      console.log(findLocation);
+      setCurrentMove(nextHistory.length - 1);  // current move
     }
-
+  
+    function matchPosition (position) {
+      let columnRowValue = ""
+  
+      if (position === 0) {
+        columnRowValue = "(1, 1)"
+      } else if (position === 1){
+        columnRowValue = "(1, 2)"
+      } else if (position === 2){
+        columnRowValue = "(1, 3)"
+      }else if (position === 3){
+        columnRowValue = "(2, 1)"
+      }else if (position === 4){
+        columnRowValue = "(2, 2)"
+      }else if (position === 5){
+        columnRowValue = "(2, 3)"
+      }else if (position === 6){
+        columnRowValue = "(3, 1)"
+      }else if (position === 7){
+        columnRowValue = "(3, 2)"
+      }else if (position === 8){
+        columnRowValue = "(3, 3)"
+      }else {
+        columnRowValue = "( , )"
+      }
+      return columnRowValue;
+    }
+  
+    function jumpTo(nextMove) {
+      setCurrentMove(nextMove);
+    }
+  
+    let moves = history.map((squares, move) => {  // const to let so can change map
+      let description;
+      if (move > 0) {
+        let rowcol = findLocation[move];
+        description = 'Go to move #' + move + rowcol;
+      } else {
+        description = 'Go to game start';
+      }
+  
+      return (
+        <li key={move}>
+          <button onClick={() => jumpTo(move)}> {description} </button>
+        </li>
+      ); 
+    });
+  
+    function toggleHistory() {
+      setIsAscending(!isAscending); // change boolean 
+    }
+  
+    if(!isAscending) {
+      moves.reverse();    // reverse
+    }
+  
     return (
-      <li key={move}>
-        <button onClick={() => jumpTo(move)}> {description} </button>
-      </li>
-    ); 
-  });
-
-  function toggleHistory() {
-    setIsAscending(!isAscending); // change boolean 
-  }
-
-  if(!isAscending) {
-    moves.reverse();    // reverse
-  }
-
-  return (
-    < div className="game">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+      < div className="game">
+        <div className="game-board">
+          <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        </div>
+        <div className="game-info">
+          <button onClick={() => toggleHistory()}>
+            {isAscending ? 'Sort by descending' : 'Sort by ascending' }  
+          </button>
+          <ol>{moves}</ol>
+          <ol>{"You are at move " + (currentMove+1)}</ol>
+        </div>
       </div>
-      <div className="game-info">
-        <button onClick={() => toggleHistory()}>
-          {isAscending ? 'Sort by descending' : 'Sort by ascending' }  
-        </button>
-        <ol>{moves}</ol>
-        <ol>{"You are at move " + (currentMove+1)}</ol>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
 function calculateWinner(squares) {
   const lines = [
